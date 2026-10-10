@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Nacional</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f9fafb; /* Light Gray */
+            color: #1f2937;
+        }
+        .parallax {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .text-brand-teal { color: #00585F; }
+        .bg-brand-teal { background-color: #00585F; }
+        .text-brand-yellow { color: #FFFCC4; }
+        .bg-brand-yellow { background-color: #FFFCC4; }
+        .border-brand-teal { border-color: #00585F; }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-slide-up { animation: slideUp 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div id="root">
+
+        <!-- ================= HOME VIEW ================= -->
+        <div id="view-home" class="min-h-screen bg-white">
+
+            <!-- NAVBAR -->
+            <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-20">
+                        <button data-nav="home" class="flex-shrink-0 flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+                            <div class="w-10 h-10 bg-[#00585F] rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-[#FFFCC4] font-bold text-xl">CN</span>
+                            </div>
+                            <span class="text-lg md:text-xl font-extrabold tracking-tight text-[#00585F] whitespace-nowrap overflow-hidden text-ellipsis">CONSULTA NACIONAL</span>
+                        </button>
+
+                        <div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-1" id="nav-desktop"></div>
+                        </div>
+
+                        <div class="md:hidden">
+                            <button id="menu-toggle" aria-label="Toggle menu" class="inline-flex items-center justify-center p-2 rounded-md text-[#00585F] hover:bg-gray-100 focus:outline-none">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path id="icon-menu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                    <path id="icon-close" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" style="display:none"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="nav-mobile" class="md:hidden hidden bg-white border-b border-gray-100 pb-4 shadow-lg">
+                    <div class="px-2 pt-2 space-y-1 sm:px-3" id="nav-mobile-links"></div>
+                </div>
+            </nav>
+
+            <!-- SEÇÃO: CONSULTA -->
+            <section id="consulta" class="pt-32 pb-24 px-4 bg-gray-50 flex flex-col items-center border-b border-gray-200">
+                <div class="max-w-7xl w-full text-center mb-12">
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-[#00585F] mb-4">Consulta Nacional</h1>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto px-4">Validação instantânea de documentos estudantis e registros docentes através de código de uso.</p>
+                </div>
+
+                <div class="w-full max-w-7xl">
+                    <div class="max-w-4xl mx-auto w-full">
+                        <form id="form-consulta" class="flex flex-col md:flex-row gap-4 mb-10 md:mb-16 px-4">
+                            <div class="relative flex-grow">
+                                <input id="input-codigo" type="text" maxlength="9" placeholder="Insira o código de uso do documento"
+                                    class="w-full px-8 py-5 rounded-2xl border-2 border-gray-200 bg-white text-[#00585F] placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#00585F]/5 focus:border-[#00585F] font-bold text-xl transition-all shadow-sm pr-20">
+                                <div class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm pointer-events-none bg-white pl-2">
+                                    <span id="code-count">0</span>/9
+                                </div>
+                            </div>
+                            <button id="btn-verificar" type="submit"
+                                class="bg-[#00585F] text-[#FFFCC4] px-12 py-5 rounded-2xl font-bold text-xl hover:bg-[#00474d] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-[#00585F]/20">
+                                <span id="btn-verificar-label">VERIFICAR</span>
+                            </button>
+                        </form>
+
+                        <!-- Erro de consulta -->
+                        <div id="erro-consulta" class="hidden bg-white border-2 border-orange-200 text-orange-800 p-8 rounded-2xl shadow-xl shadow-orange-400/10 animate-fade-in flex items-start gap-6 mx-4 mb-6">
+                            <div class="bg-orange-50 p-4 rounded-full flex-shrink-0">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-extrabold text-lg uppercase mb-1">Não foi possível concluir a consulta</p>
+                                <p id="erro-consulta-msg" class="opacity-90 font-semibold"></p>
+                                <p class="opacity-60 text-sm mt-2">Tente novamente em instantes ou entre em contato com o suporte caso o erro persista.</p>
+                            </div>
+                        </div>
+
+                        <!-- Documento não encontrado -->
+                        <div id="nao-encontrado" class="hidden bg-white border-2 border-red-100 text-red-700 p-8 rounded-2xl shadow-xl shadow-red-500/5 animate-fade-in flex items-center gap-6 mx-4">
+                            <div class="bg-red-50 p-4 rounded-full flex-shrink-0">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-extrabold text-lg uppercase mb-1">Documento não encontrado</p>
+                                <p class="opacity-80">O código informado não corresponde a nenhum registro ativo em nossa base de dados.</p>
+                            </div>
+                        </div>
+
+                        <!-- CARTÃO / RESULTADO -->
+                        <div id="cartao" class="hidden bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 animate-slide-up text-gray-800 mx-4">
+                            <div class="bg-[#00585F] p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h3 class="text-[#FFFCC4] font-black text-2xl uppercase tracking-tighter" id="cartao-titulo">Registro Estudantil</h3>
+                                    <p class="text-white/60 text-sm mt-1">CÓDIGO DE USO: <span id="cartao-codigo"></span></p>
+                                </div>
+                                <div class="flex flex-col items-start md:items-end">
+                                    <span class="bg-[#FFFCC4] text-[#00585F] px-4 py-2 rounded-xl text-sm font-black shadow-lg">ATIVO</span>
+                                </div>
+                            </div>
+
+                            <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-4 flex flex-col items-center">
+                                    <div class="w-full max-w-[280px] rounded-[2rem] overflow-hidden border-8 border-gray-50 shadow-2xl relative">
+                                        <img id="cartao-foto" src="images/IMG_8537.jpg" alt="" class="w-full h-auto object-cover">
+                                        <div class="absolute inset-0 border border-black/5 rounded-[2rem]"></div>
+                                    </div>
+                                </div>
+
+                                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-8">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Nome Completo</label>
+                                        <p class="text-2xl md:text-3xl font-black text-[#00585F] tracking-tight" id="f-nome"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Documento CPF / CIN</label>
+                                        <p class="text-xl font-bold" id="f-cpf"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Data de Nascimento</label>
+                                        <p class="text-xl font-bold" id="f-nascimento"></p>
+                                    </div>
+                                    <div id="w-matricula">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Nº de Matrícula</label>
+                                        <p class="text-xl font-bold" id="f-matricula"></p>
+                                    </div>
+                                    <div id="w-rg" class="hidden">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">RG</label>
+                                        <p class="text-xl font-bold" id="f-rg"></p>
+                                    </div>
+                                    <div id="w-escolaridade">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Nível Escolar</label>
+                                        <p class="text-xl font-bold uppercase" id="f-escolaridade"></p>
+                                    </div>
+                                    <div id="w-curso">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Curso</label>
+                                        <p class="text-xl font-bold" id="f-curso"></p>
+                                    </div>
+                                    <div id="w-instituicao" class="md:col-span-2 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase mb-2 tracking-widest opacity-40">Instituição</label>
+                                        <p class="text-xl font-black text-[#00585F]" id="f-instituicao"></p>
+                                    </div>
+                                    <div id="w-validade" class="hidden md:col-span-2 bg-green-50 p-6 rounded-2xl border border-green-100">
+                                        <label class="block text-xs font-black text-green-700 uppercase mb-2 tracking-widest opacity-40">Vigência de Validade</label>
+                                        <p class="text-2xl md:text-3xl font-black text-green-700" id="f-validade"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 px-8 py-6 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 gap-4">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                    Assinatura Digital Certificada
+                                </span>
+                                <span class="text-center">Consulta Nacional de Identificação</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: SUPORTE -->
+            <section id="suporte" class="py-24 px-4 min-h-[40vh] flex flex-col items-center transition-colors duration-500 bg-[#00585F] text-white">
+                <div class="max-w-7xl w-full">
+                    <div class="mb-12 text-center">
+                        <h2 class="text-3xl font-extrabold uppercase tracking-wide text-white">Suporte</h2>
+                        <div class="w-16 h-1 mx-auto mt-4 rounded-full bg-[#FFFCC4]"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-6xl mx-auto px-4">
+                        <div class="flex flex-col justify-center space-y-12">
+                            <div>
+                                <h3 class="text-3xl font-black text-white mb-6 tracking-tight">Canais de Atendimento</h3>
+                                <p class="text-white/80 text-lg leading-relaxed font-medium">Nossa equipe de suporte está à disposição para sanar dúvidas sobre a rede nacional de consulta, erros de autenticação ou problemas com o código de uso.</p>
+                            </div>
+
+                            <div class="space-y-8">
+                                <div class="flex items-start gap-6">
+                                    <div class="bg-[#FFFCC4] p-4 rounded-2xl text-[#00585F] shadow-lg flex-shrink-0">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-black text-white uppercase text-xs tracking-widest opacity-60 mb-1">Telefone / WhatsApp</p>
+                                        <a href="https://wa.me/5548992192943" target="_blank" rel="noopener noreferrer" class="text-xl md:text-2xl font-black text-[#FFFCC4] hover:underline transition-all flex items-center gap-2">
+                                            48 99219-2943
+                                            <span class="text-[10px] md:text-xs bg-green-500 text-white px-2 py-1 rounded font-bold">WhatsApp</span>
+                                        </a>
+                                        <p class="text-sm text-white/40 font-medium">Atendimento prioritário das 08h às 20h</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-6">
+                                    <div class="bg-[#FFFCC4] p-4 rounded-2xl text-[#00585F] shadow-lg flex-shrink-0">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-black text-white uppercase text-xs tracking-widest opacity-60 mb-1">E-mail de Suporte</p>
+                                        <p class="text-sm sm:text-lg md:text-2xl font-black text-[#FFFCC4] break-all sm:break-normal">contato@consultanacional.com.br</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10">
+                            <h4 class="text-2xl font-black text-[#00585F] mb-8 tracking-tight text-center">Formulário de Contato</h4>
+                            <form id="form-contato" class="space-y-4 md:space-y-6" novalidate>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-[#00585F] uppercase tracking-widest opacity-60">Nome Completo <span class="text-red-500">*</span></label>
+                                    <input required type="text" name="nome" maxlength="100" placeholder="Seu nome"
+                                        class="w-full bg-gray-50 border-2 border-transparent focus:border-[#00585F] rounded-2xl p-4 focus:bg-white outline-none transition-all font-semibold text-gray-800">
+                                    <p data-error="nome" class="hidden text-red-600 text-xs font-semibold flex items-center gap-1"></p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase tracking-widest opacity-60">E-mail <span class="text-red-500">*</span></label>
+                                        <input required type="email" name="email" maxlength="100" placeholder="exemplo@email.com"
+                                            class="w-full bg-gray-50 border-2 border-transparent focus:border-[#00585F] rounded-2xl p-4 focus:bg-white outline-none transition-all font-semibold text-gray-800">
+                                        <p data-error="email" class="hidden text-red-600 text-xs font-semibold flex items-center gap-1"></p>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-[#00585F] uppercase tracking-widest opacity-60">Telefone (Opcional)</label>
+                                        <input type="tel" name="telefone" maxlength="20" placeholder="(00) 00000-0000"
+                                            class="w-full bg-gray-50 border-2 border-transparent focus:border-[#00585F] rounded-2xl p-4 focus:bg-white outline-none transition-all font-semibold text-gray-800">
+                                        <p data-error="telefone" class="hidden text-red-600 text-xs font-semibold flex items-center gap-1"></p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-[#00585F] uppercase tracking-widest opacity-60">Assunto <span class="text-red-500">*</span></label>
+                                    <input required type="text" name="assunto" maxlength="200" placeholder="Ex: Problema com código"
+                                        class="w-full bg-gray-50 border-2 border-transparent focus:border-[#00585F] rounded-2xl p-4 focus:bg-white outline-none transition-all font-semibold text-gray-800">
+                                    <p data-error="assunto" class="hidden text-red-600 text-xs font-semibold flex items-center gap-1"></p>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-[#00585F] uppercase tracking-widest opacity-60">Mensagem <span class="text-red-500">*</span></label>
+                                    <textarea required name="mensagem" rows="4" maxlength="5000" placeholder="Como podemos te ajudar?"
+                                        class="w-full bg-gray-50 border-2 border-transparent focus:border-[#00585F] rounded-2xl p-4 focus:bg-white outline-none transition-all resize-none font-semibold text-gray-800"></textarea>
+                                    <div class="flex justify-between items-start">
+                                        <p data-error="mensagem" class="hidden text-red-600 text-xs font-semibold flex items-center gap-1"></p>
+                                        <p class="text-xs text-gray-400 font-semibold ml-auto"><span id="msg-count">0</span>/5000</p>
+                                    </div>
+                                </div>
+
+                                <div id="form-status" class="hidden bg-red-50 border-2 border-red-200 rounded-2xl p-4 flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <p id="form-status-msg" class="text-red-700 font-semibold text-sm"></p>
+                                </div>
+
+                                <button type="submit" id="btn-enviar"
+                                    class="w-full bg-[#00585F] text-[#FFFCC4] font-black py-5 rounded-2xl hover:bg-[#00474d] transition-all flex items-center justify-center gap-3 text-lg shadow-xl shadow-[#00585F]/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span id="btn-enviar-label">Enviar Solicitação</span>
+                                    <svg id="btn-enviar-check" class="hidden w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: SOBRE -->
+            <section id="sobre" class="py-24 px-4 min-h-[40vh] flex flex-col items-center transition-colors duration-500 bg-white text-[#00585F]">
+                <div class="max-w-7xl w-full">
+                    <div class="mb-12 text-center">
+                        <h2 class="text-3xl font-extrabold uppercase tracking-wide text-[#00585F]">Sobre a Consulta Nacional</h2>
+                        <div class="w-16 h-1 mx-auto mt-4 rounded-full bg-[#00585F]"></div>
+                    </div>
+
+                    <div class="max-w-4xl mx-auto px-4 text-center">
+                        <div class="mb-8 flex justify-center">
+                            <img src="images/convenio.jpg" alt="Logo Convênio Nacional dos Estudantes" class="max-h-24 md:max-h-32 object-contain">
+                        </div>
+                        <div class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50">
+                            <p class="text-xl leading-relaxed text-gray-700 font-medium italic">"A Consulta Nacional é uma iniciativa de transparência e segurança para a validação de identidades estudantis e docentes. Através de nossa infraestrutura centralizada, permitimos que parceiros e órgãos fiscalizadores verifiquem a autenticidade de benefícios como a meia-entrada, garantindo agilidade e combatendo fraudes em todo o território nacional."</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: PROCON -->
+            <section id="procon" class="py-24 px-4 min-h-[40vh] flex flex-col items-center transition-colors duration-500 bg-gray-50 text-[#00585F]">
+                <div class="max-w-7xl w-full">
+                    <div class="mb-12 text-center">
+                        <h2 class="text-3xl font-extrabold uppercase tracking-wide text-[#00585F]">Procon SC</h2>
+                        <div class="w-16 h-1 mx-auto mt-4 rounded-full bg-[#00585F]"></div>
+                    </div>
+
+                    <div class="max-w-4xl mx-auto text-center px-4">
+                        <div class="mb-10 flex justify-center">
+                            <img src="images/proconsc.png" alt="Logo Procon SC" class="max-h-20 md:max-h-28 object-contain">
+                        </div>
+                        <div class="space-y-8">
+                            <div class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50">
+                                <p class="text-xl leading-relaxed text-gray-700 font-medium italic">"O Procon de Santa Catarina (SC) é o órgão responsável pela defesa dos direitos do consumidor no estado. Ele atua rigorosamente na fiscalização da Lei da Meia-Entrada, garantindo que estudantes e professores tenham seus direitos respeitados em eventos e estabelecimentos. Caso enfrente dificuldades na aceitação de documentos válidos, acione os canais oficiais do Procon SC."</p>
+                            </div>
+
+                            <div class="bg-white p-8 rounded-[2.5rem] border border-[#00585F]/10 shadow-xl">
+                                <p class="text-xl md:text-2xl font-bold text-[#00585F] leading-relaxed">
+                                    Teve algum problema em utilizar o direito a meia-entrada? <br class="hidden md:block">Entre em contato no WhatsApp do suporte <br class="md:hidden"><a href="https://wa.me/5548992192943" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:underline"> 48 99219-2943</a>. <br><span class="text-lg font-medium opacity-70">Somos parceiros do Procon SC.</span>
+                                </p>
+                            </div>
+
+                            <div class="mt-8">
+                                <a href="https://www.procon.sc.gov.br" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-[#00585F] text-[#FFFCC4] px-8 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg">
+                                    Acessar site oficial do Procon SC
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FOOTER -->
+            <footer class="bg-[#002b2e] text-white/40 py-16 px-4">
+                <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+                    <div class="text-center md:text-left">
+                        <button data-nav="home" class="flex items-center gap-3 mb-6 justify-center md:justify-start hover:opacity-80 transition-opacity">
+                            <div class="w-10 h-10 bg-[#FFFCC4] rounded-xl flex items-center justify-center">
+                                <span class="text-[#00585F] font-black text-lg">CN</span>
+                            </div>
+                            <span class="text-2xl font-black text-white tracking-tighter text-left">CONSULTA NACIONAL</span>
+                        </button>
+                        <p class="max-w-md text-sm leading-loose">Sistema Unificado de Validação de Documentos Estudantis. Protegido por criptografia de ponta a ponta e em conformidade com as leis de proteção de dados vigentes (LGPD).</p>
+                    </div>
+                    <div class="text-sm text-center md:text-right font-semibold">
+                        <p class="text-white/80">© <span id="ano"></span> Consulta Nacional • Todos os direitos reservados</p>
+                        <div class="mt-6 flex flex-wrap justify-center md:justify-end gap-6 text-xs uppercase tracking-widest opacity-50">
+                            <button data-view="privacy" class="hover:text-white transition-colors">Privacidade</button>
+                            <button data-view="terms" class="hover:text-white transition-colors">Termos de Uso</button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- ================= PRIVACIDADE ================= -->
+        <div id="view-privacy" class="hidden min-h-screen bg-white">
+            <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-20">
+                        <button data-nav="home" class="flex-shrink-0 flex items-center gap-2 hover:opacity-80 transition-opacity">
+                            <div class="w-10 h-10 bg-[#00585F] rounded-lg flex items-center justify-center flex-shrink-0"><span class="text-[#FFFCC4] font-bold text-xl">CN</span></div>
+                            <span class="text-lg md:text-xl font-extrabold tracking-tight text-[#00585F]">CONSULTA NACIONAL</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div class="pt-32 pb-24 px-4 bg-white min-h-screen">
+                <div class="max-w-4xl mx-auto">
+                    <button data-nav="home" class="flex items-center gap-2 text-[#00585F] font-bold mb-8 hover:underline">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Voltar ao Início
+                    </button>
+                    <h1 class="text-4xl font-black text-[#00585F] mb-8 uppercase">Política de Privacidade</h1>
+                    <div class="prose prose-lg text-gray-700 space-y-6">
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">1. Compromisso com a Privacidade</h2>
+                            <p>A Consulta Nacional está comprometida com a proteção de seus dados pessoais. Esta política descreve como tratamos as informações coletadas através de nossa plataforma em conformidade com a Lei Geral de Proteção de Dados (LGPD).</p>
+                        </section>
+                        <section class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">2. Ausência de Cookies</h2>
+                            <p class="font-bold">Informamos que este website NÃO utiliza cookies de rastreamento, publicidade ou análise de terceiros.</p>
+                            <p class="mt-2">Privilegiamos a sua privacidade e optamos por uma arquitetura que não necessita armazenar arquivos de rastreamento em seu navegador para funcionar.</p>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">3. Coleta de Dados</h2>
+                            <p>Coletamos dados apenas quando você preenche voluntariamente nosso formulário de suporte. As informações coletadas podem incluir:</p>
+                            <ul class="list-disc pl-6 mt-2 space-y-1">
+                                <li>Nome Completo</li>
+                                <li>E-mail</li>
+                                <li>Telefone (Opcional)</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">4. Finalidade do Tratamento</h2>
+                            <p>Os dados fornecidos via suporte são utilizados exclusivamente para:</p>
+                            <ul class="list-disc pl-6 mt-2 space-y-1">
+                                <li>Responder a solicitações de suporte e dúvidas.</li>
+                                <li>Prestar auxílio em caso de problemas com o código de uso.</li>
+                                <li>Melhorar nossos processos de atendimento.</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">5. Seus Direitos</h2>
+                            <p>Você tem o direito de solicitar o acesso, retificação ou exclusão de seus dados pessoais a qualquer momento através de nossos canais de suporte.</p>
+                        </section>
+                        <p class="text-sm text-gray-400 mt-12">Última atualização: Janeiro de 2026</p>
+                    </div>
+                </div>
+            </div>
+            <footer class="bg-[#002b2e] text-white/40 py-16 px-4">
+                <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+                    <div class="text-center md:text-left">
+                        <button data-nav="home" class="flex items-center gap-3 mb-6 justify-center md:justify-start hover:opacity-80 transition-opacity">
+                            <div class="w-10 h-10 bg-[#FFFCC4] rounded-xl flex items-center justify-center"><span class="text-[#00585F] font-black text-lg">CN</span></div>
+                            <span class="text-2xl font-black text-white tracking-tighter text-left">CONSULTA NACIONAL</span>
+                        </button>
+                        <p class="max-w-md text-sm leading-loose">Sistema Unificado de Validação de Documentos Estudantis. Protegido por criptografia de ponta a ponta e em conformidade com as leis de proteção de dados vigentes (LGPD).</p>
+                    </div>
+                    <div class="text-sm text-center md:text-right font-semibold">
+                        <p class="text-white/80">© <span class="ano"></span> Consulta Nacional • Todos os direitos reservados</p>
+                        <div class="mt-6 flex flex-wrap justify-center md:justify-end gap-6 text-xs uppercase tracking-widest opacity-50">
+                            <button data-view="privacy" class="hover:text-white transition-colors">Privacidade</button>
+                            <button data-view="terms" class="hover:text-white transition-colors">Termos de Uso</button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- ================= TERMOS ================= -->
+        <div id="view-terms" class="hidden min-h-screen bg-white">
+            <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-20">
+                        <button data-nav="home" class="flex-shrink-0 flex items-center gap-2 hover:opacity-80 transition-opacity">
+                            <div class="w-10 h-10 bg-[#00585F] rounded-lg flex items-center justify-center flex-shrink-0"><span class="text-[#FFFCC4] font-bold text-xl">CN</span></div>
+                            <span class="text-lg md:text-xl font-extrabold tracking-tight text-[#00585F]">CONSULTA NACIONAL</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div class="pt-32 pb-24 px-4 bg-white min-h-screen">
+                <div class="max-w-4xl mx-auto">
+                    <button data-nav="home" class="flex items-center gap-2 text-[#00585F] font-bold mb-8 hover:underline">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Voltar ao Início
+                    </button>
+                    <h1 class="text-4xl font-black text-[#00585F] mb-8 uppercase">Termos de Uso</h1>
+                    <div class="prose prose-lg text-gray-700 space-y-6">
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">1. Aceitação dos Termos</h2>
+                            <p>Ao acessar a plataforma Consulta Nacional, você concorda em cumprir estes termos de uso, todas as leis e regulamentos aplicáveis. Se você não concordar com algum destes termos, está proibido de usar ou acessar este site.</p>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">2. Licença de Uso</h2>
+                            <p>O serviço de consulta é destinado à verificação de autenticidade de documentos para fins legítimos de concessão de benefícios (como meia-entrada) e fiscalização.</p>
+                            <p class="mt-2">É terminantemente proibido:</p>
+                            <ul class="list-disc pl-6 mt-2 space-y-1">
+                                <li>Utilizar ferramentas de automação (bots, scrapers) para extrair dados.</li>
+                                <li>Tentar descompilar ou fazer engenharia reversa de qualquer software contido no site.</li>
+                                <li>Utilizar o serviço para fins ilícitos ou fraudulentos.</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">3. Precisão das Informações</h2>
+                            <p>A Consulta Nacional atua como uma interface de validação baseada em bancos de dados de emissores credenciados. Embora busquemos a máxima precisão, não garantimos que as informações reflitam atualizações em tempo real feitas por instituições de ensino se estas ainda não foram sincronizadas com o sistema central.</p>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">4. Propriedade Intelectual</h2>
+                            <p>Todo o conteúdo visual, marcas e logotipos presentes nesta plataforma são de propriedade da Consulta Nacional ou de seus parceiros (como o Convênio Nacional dos Estudantes e Procon SC) e são protegidos por leis de direitos autorais.</p>
+                        </section>
+                        <section>
+                            <h2 class="text-2xl font-bold text-[#00585F] mb-4">5. Limitações</h2>
+                            <p>Em nenhum caso a Consulta Nacional ou seus parceiros serão responsáveis por quaisquer danos decorrentes do uso ou da incapacidade de usar o serviço.</p>
+                        </section>
+                        <p class="text-sm text-gray-400 mt-12">Última atualização: Janeiro de 2026</p>
+                    </div>
+                </div>
+            </div>
+            <footer class="bg-[#002b2e] text-white/40 py-16 px-4">
+                <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+                    <div class="text-center md:text-left">
+                        <button data-nav="home" class="flex items-center gap-3 mb-6 justify-center md:justify-start hover:opacity-80 transition-opacity">
+                            <div class="w-10 h-10 bg-[#FFFCC4] rounded-xl flex items-center justify-center"><span class="text-[#00585F] font-black text-lg">CN</span></div>
+                            <span class="text-2xl font-black text-white tracking-tighter text-left">CONSULTA NACIONAL</span>
+                        </button>
+                        <p class="max-w-md text-sm leading-loose">Sistema Unificado de Validação de Documentos Estudantis. Protegido por criptografia de ponta a ponta e em conformidade com as leis de proteção de dados vigentes (LGPD).</p>
+                    </div>
+                    <div class="text-sm text-center md:text-right font-semibold">
+                        <p class="text-white/80">© <span class="ano"></span> Consulta Nacional • Todos os direitos reservados</p>
+                        <div class="mt-6 flex flex-wrap justify-center md:justify-end gap-6 text-xs uppercase tracking-widest opacity-50">
+                            <button data-view="privacy" class="hover:text-white transition-colors">Privacidade</button>
+                            <button data-view="terms" class="hover:text-white transition-colors">Termos de Uso</button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+    </div>
+
+<script>
+(function () {
+    "use strict";
+
+    var WEBSERVICE = "https://webservice.consultanacional.com.br/v1";
+    var PLACEHOLDER = "https://placehold.co/400x400/00585F/FFFCC4?text=Consulta+Nacional";
+    var TIMEOUT = 30000;
+
+    var DEMO_CODE = "Q7nK4zLpA";
+    var DEMO = {
+        type: "ALUNO",
+        nome: "NICOLAS ALUISIO COLOMBELLI SCHMITZ",
+        foto: "images/IMG_8537.jpg",
+        cpfCin: "090.059.159-51",
+        dataNascimento: "21/10/2005",
+        matricula: "Matrícula não informada",
+        rg: "09005915951",
+        escolaridade: "Graduação",
+        curso: "DIREITO",
+        instituicao: "UNIVERSIDADE REGIONAL DE BLUMENAU"
+    };
+
+    var STATUS = {
+        400: "Requisição inválida - Verifique o formato do código",
+        403: "Acesso negado - Esta origem não é autorizada",
+        404: "Registro não encontrado - Código inválido",
+        405: "Método não permitido - Use POST",
+        429: "Muitas requisições - Tente novamente em 1 minuto",
+        500: "Erro no servidor - Tente novamente mais tarde"
+    };
+
+    /* ---------- helpers ---------- */
+    function $(s, c) { return (c || document).querySelector(s); }
+    function $$(s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); }
+    function onlyCode(v) { return String(v).replace(/[^a-zA-Z0-9]/g, "").substring(0, 9); }
+    function digits(v) { return String(v).replace(/\D/g, ""); }
+    function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+    function mapAluno(a) {
+        return {
+            type: "ALUNO",
+            nome: a.nome != null ? a.nome : "Nome não informado",
+            foto: a.foto != null ? a.foto : PLACEHOLDER,
+            cpfCin: a.cpf != null ? a.cpf : "CPF não informado",
+            dataNascimento: a.dataNascimento != null ? a.dataNascimento : "Data não informada",
+            matricula: a.matricula != null ? a.matricula : "Matrícula não informada",
+            rg: a.rg != null ? a.rg : "RG não informado",
+            escolaridade: a.escolaridade != null ? a.escolaridade : "Nível não informado",
+            curso: a.curso,
+            instituicao: a.instituicao != null ? a.instituicao : "Instituição não informada"
+        };
+    }
+
+    function mapProfessor(p) {
+        return {
+            type: "PROFESSOR",
+            nome: p.nome != null ? p.nome : "Nome não informado",
+            foto: p.foto != null ? p.foto : PLACEHOLDER,
+            cpfCin: p.cpf != null ? p.cpf : "CPF não informado",
+            dataNascimento: p.dataNascimento != null ? p.dataNascimento : "Data não informada",
+            validade: p.validade != null ? p.validade : "Validade não informada"
+        };
+    }
+
+    function statusMessage(code) {
+        return STATUS[code] || "Erro desconhecido ao consultar documento";
+    }
+
+    function withTimeout(ms) {
+        var ctrl = new AbortController();
+        var id = setTimeout(function () { ctrl.abort(); }, ms);
+        return { signal: ctrl.signal, clear: function () { clearTimeout(id); } };
+    }
+
+    /* ---------- consulta ---------- */
+    async function consultar(codigo) {
+        /* código demo: retorna os dados locais (não depende da API) */
+        if (codigo.toUpperCase() === DEMO_CODE.toUpperCase()) {
+            await new Promise(function (r) { setTimeout(r, 350); });
+            return Object.assign({}, DEMO);
+        }
+        var t = withTimeout(TIMEOUT);
+        try {
+            var res = await fetch(WEBSERVICE + "/consulta", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ codigo: codigo }),
+                signal: t.signal
+            });
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error(statusMessage(res.status));
+            var data = await res.json();
+            if (!data.sucesso) throw new Error(data.mensagem != null ? data.mensagem : "Não foi possível concluir a consulta");
+            if (data.tipo === "A" && data.aluno) return mapAluno(data.aluno);
+            if (data.tipo === "P" && data.professor) return mapProfessor(data.professor);
+            return null;
+        } catch (err) {
+            if (err && err.name === "AbortError") {
+                throw new Error("Tempo limite de 30 segundos excedido - Tente novamente");
+            }
+            throw new Error(err instanceof Error ? err.message : "Erro de conexão com o servidor");
+        } finally {
+            t.clear();
+        }
+    }
+
+    /* ---------- estado da home ---------- */
+    var input = $("#input-codigo");
+    var count = $("#code-count");
+    var btnVerificar = $("#btn-verificar");
+    var btnLabel = $("#btn-verificar-label");
+    var cartao = $("#cartao");
+    var erroBox = $("#erro-consulta");
+    var erroMsg = $("#erro-consulta-msg");
+    var naoEncontrado = $("#nao-encontrado");
+    var loading = false;
+    var lastCode = "";
+    var currentView = "home";
+
+    function setLoading(v) {
+        loading = v;
+        btnVerificar.disabled = v || !input.value;
+        if (v) {
+            btnLabel.innerHTML = '<svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        } else {
+            btnLabel.textContent = "VERIFICAR";
+        }
+    }
+
+    function hideStates() {
+        erroBox.classList.add("hidden");
+        erroBox.classList.remove("flex");
+        naoEncontrado.classList.add("hidden");
+        naoEncontrado.classList.remove("flex");
+        cartao.classList.add("hidden");
+    }
+
+    function showError(msg) {
+        hideStates();
+        erroMsg.textContent = msg;
+        erroBox.classList.remove("hidden");
+        erroBox.classList.add("flex");
+    }
+
+    function showNotFound() {
+        hideStates();
+        naoEncontrado.classList.remove("hidden");
+        naoEncontrado.classList.add("flex");
+    }
+
+    function showCard(d, code) {
+        hideStates();
+        $("#cartao-titulo").textContent = d.type === "ALUNO" ? "Registro Estudantil" : "Registro Docente";
+        $("#cartao-codigo").textContent = code;
+        $("#cartao-foto").src = d.foto;
+        $("#cartao-foto").alt = d.nome;
+        $("#f-nome").textContent = d.nome;
+        $("#f-cpf").textContent = d.cpfCin;
+        $("#f-nascimento").textContent = d.dataNascimento;
+
+        var isAluno = d.type === "ALUNO";
+        $("#w-matricula").classList.toggle("hidden", !isAluno);
+        $("#w-rg").classList.toggle("hidden", !(isAluno && digits(d.rg) !== digits(d.cpfCin)));
+        $("#w-escolaridade").classList.toggle("hidden", !isAluno);
+        $("#w-curso").classList.toggle("hidden", !(isAluno && d.curso));
+        $("#w-instituicao").classList.toggle("hidden", !isAluno);
+        $("#w-validade").classList.toggle("hidden", isAluno);
+
+        if (isAluno) {
+            $("#f-matricula").textContent = d.matricula;
+            $("#f-rg").textContent = d.rg;
+            $("#f-escolaridade").textContent = d.escolaridade;
+            $("#f-curso").textContent = d.curso;
+            $("#f-instituicao").textContent = d.instituicao;
+        } else {
+            $("#f-validade").textContent = d.validade;
+        }
+
+        cartao.classList.remove("hidden");
+        cartao.classList.add("animate-slide-up");
+    }
+
+    async function runConsulta(code) {
+        var clean = onlyCode(code);
+        if (!clean) {
+            hideStates();
+            showError("Informe um código válido.");
+            return;
+        }
+        hideStates();
+        setLoading(true);
+        lastCode = clean;
+        try {
+            var result = await consultar(clean);
+            if (result) showCard(result, clean);
+            else showNotFound();
+        } catch (err) {
+            showError(err instanceof Error ? err.message : "Erro de conexão com o servidor");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    input.addEventListener("input", function () {
+        var clean = onlyCode(input.value);
+        if (input.value !== clean) input.value = clean;
+        count.textContent = clean.length;
+        btnVerificar.disabled = loading || !clean;
+        erroBox.classList.add("hidden");
+        naoEncontrado.classList.add("hidden");
+    });
+
+    $("#form-consulta").addEventListener("submit", function (e) {
+        e.preventDefault();
+        runConsulta(input.value);
+    });
+
+    function setPlaceholder() {
+        input.placeholder = window.innerWidth < 768 ? "Insira o código de uso" : "Insira o código de uso do documento";
+    }
+    setPlaceholder();
+    window.addEventListener("resize", setPlaceholder);
+
+    /* código a partir da URL */
+    var rawPath = window.location.pathname.replace(/^\/|\/$/g, "");
+    var pathCode = (/^[a-zA-Z0-9]{1,9}$/.test(rawPath) && rawPath.indexOf(".") === -1) ? rawPath : "";
+    var queryCode = onlyCode(new URLSearchParams(window.location.search).get("codigo") || "");
+    var initialCode = pathCode || queryCode || DEMO_CODE;
+    if (initialCode) {
+        input.value = initialCode;
+        count.textContent = initialCode.length;
+        btnVerificar.disabled = false;
+        setTimeout(function () { runConsulta(initialCode); }, 0);
+    } else {
+        setLoading(false);
+    }
+
+    /* ---------- navegação ---------- */
+    var NAV = [
+        { label: "Consulta de documento", id: "consulta" },
+        { label: "Suporte", id: "suporte" },
+        { label: "Sobre", id: "sobre" },
+        { label: "Procon SC", id: "procon" }
+    ];
+    var activeSection = "consulta";
+    var menuOpen = false;
+
+    function renderNav() {
+        var desktop = $("#nav-desktop");
+        var mobile = $("#nav-mobile-links");
+        desktop.innerHTML = "";
+        mobile.innerHTML = "";
+        NAV.forEach(function (item) {
+            var clsD = activeSection === item.id
+                ? "px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap bg-[#00585F] text-[#FFFCC4]"
+                : "px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap text-gray-600 hover:text-[#00585F] hover:bg-gray-50";
+            var bd = document.createElement("button");
+            bd.className = clsD;
+            bd.textContent = item.label;
+            bd.addEventListener("click", function () { scrollToSection(item.id); });
+            desktop.appendChild(bd);
+
+            var bm = document.createElement("button");
+            bm.className = "block w-full text-left px-4 py-3 rounded-md text-base font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#00585F]";
+            bm.textContent = item.label;
+            bm.addEventListener("click", function () { scrollToSection(item.id); });
+            mobile.appendChild(bm);
+        });
+    }
+
+    function closeMenu() {
+        menuOpen = false;
+        $("#nav-mobile").classList.add("hidden");
+        $("#icon-menu").style.display = "";
+        $("#icon-close").style.display = "none";
+    }
+
+    $("#menu-toggle").addEventListener("click", function () {
+        menuOpen = !menuOpen;
+        $("#nav-mobile").classList.toggle("hidden", !menuOpen);
+        $("#icon-menu").style.display = menuOpen ? "none" : "";
+        $("#icon-close").style.display = menuOpen ? "" : "none";
+    });
+
+    function scrollToSection(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            var top = el.getBoundingClientRect().top + window.pageYOffset - 80;
+            window.scrollTo({ top: top, behavior: "smooth" });
+        }
+        closeMenu();
+    }
+
+    renderNav();
+
+    window.addEventListener("scroll", function () {
+        if (currentView !== "home") return;
+        var ids = ["consulta", "suporte", "sobre", "procon"];
+        var y = window.scrollY + 150;
+        for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (el && y >= el.offsetTop && y < el.offsetTop + el.offsetHeight) {
+                if (activeSection !== ids[i]) { activeSection = ids[i]; renderNav(); }
+                break;
+            }
+        }
+    });
+
+    /* ---------- views ---------- */
+    function setView(v) {
+        currentView = v;
+        $("#view-home").classList.toggle("hidden", v !== "home");
+        $("#view-privacy").classList.toggle("hidden", v !== "privacy");
+        $("#view-terms").classList.toggle("hidden", v !== "terms");
+        window.scrollTo(0, 0);
+        closeMenu();
+    }
+    $$("[data-view]").forEach(function (b) {
+        b.addEventListener("click", function () { setView(b.getAttribute("data-view")); });
+    });
+    $$("[data-nav='home']").forEach(function (b) {
+        b.addEventListener("click", function () { setView("home"); });
+    });
+
+    /* ---------- formulário de contato ---------- */
+    var fContato = $("#form-contato");
+    var status = "idle";
+
+    function setFieldError(name, msg) {
+        var p = fContato.querySelector('[data-error="' + name + '"]');
+        var field = fContato.querySelector('[name="' + name + '"]');
+        if (msg) {
+            p.classList.remove("hidden");
+            p.classList.add("flex");
+            p.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>' + msg;
+            field.classList.add("border-red-300");
+            field.classList.remove("border-transparent");
+        } else {
+            p.classList.add("hidden");
+            p.classList.remove("flex");
+            field.classList.remove("border-red-300");
+            field.classList.add("border-transparent");
+        }
+    }
+
+    function hasUnsafe(v) {
+        return [/<script/gi, /javascript:/gi, /on\w+\s*=/gi, /<iframe/gi, /<object/gi, /<embed/gi]
+            .some(function (re) { return re.test(v); });
+    }
+
+    function hasInjection(v) {
+        return [/\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|DECLARE)\b/gi,
+                /(;|\-\-|\/\*|\*\/|xp_|sp_)/gi]
+            .some(function (re) { return re.test(v); });
+    }
+
+    function hasTraversal(v) {
+        return /(\.\.[\/\\]|[\/\\]\.\.)/.test(v);
+    }
+
+    function sanitizeText(v) {
+        return v.replace(/[^a-zA-ZÀ-ÿ0-9\s.,!?;:()\-'" ]/g, "");
+    }
+
+    function sanitizePhone(v) {
+        return v.replace(/[^\d\s+()-]/g, "");
+    }
+
+    function validate(data) {
+        var errs = {};
+        var limits = { nome: 100, email: 100, telefone: 20, assunto: 200, mensagem: 5000 };
+        var nome = (data.nome || "").trim();
+        if (!nome) errs.nome = "O nome é obrigatório";
+        else if (nome.length > limits.nome) errs.nome = "O nome não pode exceder " + limits.nome + " caracteres";
+        else if (hasUnsafe(nome) || hasInjection(nome) || hasTraversal(nome)) errs.nome = "O nome contém caracteres não permitidos";
+
+        var email = (data.email || "").trim();
+        if (!email) errs.email = "O e-mail é obrigatório";
+        else if (!isEmail(email)) errs.email = "Formato de e-mail inválido";
+        else if (email.length > limits.email) errs.email = "O e-mail não pode exceder " + limits.email + " caracteres";
+
+        if (data.telefone && data.telefone.trim().length > limits.telefone)
+            errs.telefone = "O telefone não pode exceder " + limits.telefone + " caracteres";
+
+        var assunto = (data.assunto || "").trim();
+        if (!assunto) errs.assunto = "O assunto é obrigatório";
+        else if (assunto.length > limits.assunto) errs.assunto = "O assunto não pode exceder " + limits.assunto + " caracteres";
+        else if (hasUnsafe(assunto) || hasInjection(assunto) || hasTraversal(assunto)) errs.assunto = "O assunto contém caracteres não permitidos";
+
+        var mensagem = (data.mensagem || "").trim();
+        if (!mensagem) errs.mensagem = "A mensagem é obrigatória";
+        else if (mensagem.length > limits.mensagem) errs.mensagem = "A mensagem não pode exceder " + limits.mensagem + " caracteres";
+        else if (hasUnsafe(mensagem) || hasInjection(mensagem) || hasTraversal(mensagem)) errs.mensagem = "A mensagem contém caracteres não permitidos";
+
+        return errs;
+    }
+
+    var msgArea = fContato.querySelector('[name="mensagem"]');
+    msgArea.addEventListener("input", function () { $("#msg-count").textContent = msgArea.value.length; });
+
+    fContato.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        ["nome", "email", "telefone", "assunto", "mensagem"].forEach(function (n) { setFieldError(n, ""); });
+        $("#form-status").classList.add("hidden");
+
+        var data = {
+            nome: sanitizeText(fContato.querySelector('[name="nome"]').value.trim()),
+            email: fContato.querySelector('[name="email"]').value.trim().toLowerCase(),
+            telefone: sanitizePhone(fContato.querySelector('[name="telefone"]').value.trim()),
+            assunto: sanitizeText(fContato.querySelector('[name="assunto"]').value.trim()),
+            mensagem: fContato.querySelector('[name="mensagem"]').value.trim()
+        };
+
+        var errs = validate(data);
+        var keys = Object.keys(errs);
+        if (keys.length) {
+            keys.forEach(function (k) { setFieldError(k, errs[k]); });
+            $("#form-status-msg").textContent = "Por favor, corrija os erros no formulário";
+            $("#form-status").classList.remove("hidden");
+            setTimeout(function () { $("#form-status").classList.add("hidden"); }, 5000);
+            return;
+        }
+
+        status = "sending";
+        $("#btn-enviar").disabled = true;
+        $("#btn-enviar-label").textContent = "Enviando...";
+
+        try {
+            var t = withTimeout(TIMEOUT);
+            var res = await fetch(WEBSERVICE + "/enviaremail", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+                signal: t.signal
+            });
+            t.clear();
+            var out = {};
+            try { out = await res.json(); } catch (e2) { out = { sucesso: true }; }
+            if (!out.sucesso || res.status === 500) {
+                throw new Error(out.mensagem != null ? out.mensagem : "Erro ao enviar mensagem");
+            }
+            status = "success";
+            $("#btn-enviar-label").textContent = "Mensagem Enviada";
+            $("#btn-enviar-check").classList.remove("hidden");
+            fContato.reset();
+            $("#msg-count").textContent = "0";
+            setTimeout(function () {
+                status = "idle";
+                $("#btn-enviar").disabled = false;
+                $("#btn-enviar-label").textContent = "Enviar Solicitação";
+                $("#btn-enviar-check").classList.add("hidden");
+            }, 3000);
+        } catch (err) {
+            status = "error";
+            var m = err && err.name === "AbortError"
+                ? "Tempo limite excedido - Tente novamente"
+                : (err instanceof Error ? err.message : "Erro ao enviar mensagem. Tente novamente mais tarde.");
+            $("#form-status-msg").textContent = m;
+            $("#form-status").classList.remove("hidden");
+            $("#btn-enviar-label").textContent = "Enviar Solicitação";
+            $("#btn-enviar").disabled = false;
+            status = "idle";
+            setTimeout(function () { $("#form-status").classList.add("hidden"); }, 5000);
+        }
+    });
+
+    /* ---------- ano ---------- */
+    $("#ano").textContent = new Date().getFullYear();
+    $$(".ano").forEach(function (el) { el.textContent = new Date().getFullYear(); });
+})();
+</script>
+</body>
+</html>
